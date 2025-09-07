@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{DAEMON_NAME}}
+  labels:
+    app: {{DAEMON_NAME}}
+    component: daemon
+spec:
+  replicas: {{REPLICAS}}
+  selector:
+    matchLabels:
+      app: {{DAEMON_NAME}}
+  template:
+    metadata:
+      labels:
+        app: {{DAEMON_NAME}}
+        component: daemon
+    spec:
+      containers:
+        - name: daemon
+          image: {{IMAGE_NAME}}:{{IMAGE_TAG}}
+          command: ["php", "bin/console", "{{COMMAND_NAME}}"]
+{{#COMMAND_ARGS}}
+          args:
+{{#ARGS}}
+            - "{{ARG}}"
+{{/ARGS}}
+{{/COMMAND_ARGS}}
+          env:
+            - name: APP_ENV
+              value: "{{APP_ENV}}"
+{{#ENV_VARS}}
+            - name: {{KEY}}
+              value: "{{VALUE}}"
+{{/ENV_VARS}}
+          envFrom:
+            - configMapRef:
+                name: app-config
+          resources:
+            requests:
+              memory: "{{MEMORY_REQUEST}}"
+              cpu: "{{CPU_REQUEST}}"
+            limits:
+              memory: "{{MEMORY_LIMIT}}"
+              cpu: "{{CPU_LIMIT}}"
+          volumeMounts:
+            - name: app-logs
+              mountPath: /app/storage/logs
+      volumes:
+        - name: app-logs
+          emptyDir: {}
+      restartPolicy: Always

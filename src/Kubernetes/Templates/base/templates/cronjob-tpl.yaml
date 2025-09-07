@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{CRONJOB_NAME}}
+  labels:
+    app: {{CRONJOB_NAME}}
+    component: cronjob
+spec:
+  schedule: "{{SCHEDULE}}"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: {{CRONJOB_NAME}}
+            component: cronjob
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: cronjob
+              image: {{IMAGE_NAME}}:{{IMAGE_TAG}}
+              command: ["php", "bin/console", "{{COMMAND_NAME}}"]
+{{#COMMAND_ARGS}}
+              args:
+{{#ARGS}}
+                - "{{ARG}}"
+{{/ARGS}}
+{{/COMMAND_ARGS}}
+              env:
+                - name: APP_ENV
+                  value: "{{APP_ENV}}"
+{{#ENV_VARS}}
+                - name: {{KEY}}
+                  value: "{{VALUE}}"
+{{/ENV_VARS}}
+              envFrom:
+                - configMapRef:
+                    name: app-config
+              resources:
+                requests:
+                  memory: "{{MEMORY_REQUEST}}"
+                  cpu: "{{CPU_REQUEST}}"
+                limits:
+                  memory: "{{MEMORY_LIMIT}}"
+                  cpu: "{{CPU_LIMIT}}"
+              volumeMounts:
+                - name: app-logs
+                  mountPath: /app/storage/logs
+          volumes:
+            - name: app-logs
+              emptyDir: {}

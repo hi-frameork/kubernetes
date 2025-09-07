@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-http
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-http
+  template:
+    metadata:
+      labels:
+        app: app-http
+    spec:
+      containers:
+        - name: app
+          image: app:latest
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: APP_ENV
+              value: "production"
+          envFrom:
+            - configMapRef:
+                name: app-config
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5

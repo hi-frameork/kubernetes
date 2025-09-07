@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-http
+spec:
+  template:
+    spec:
+      containers:
+        - name: app
+          resources:
+            requests:
+              memory: "{{MEMORY_REQUEST}}"
+              cpu: "{{CPU_REQUEST}}"
+            limits:
+              memory: "{{MEMORY_LIMIT}}"
+              cpu: "{{CPU_LIMIT}}"
