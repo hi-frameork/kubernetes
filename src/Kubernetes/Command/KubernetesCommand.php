@@ -13,7 +13,7 @@ use Hi\Kubernetes\Data\GenerateConfig;
 class KubernetesCommand extends AbstractCommand
 {
     protected string $name = 'k8s';
-    protected string $desc = 'Kubernetes command';
+    protected string $desc = 'Kubernetes manifest generator command';
     protected array $actions = [
         'init' => [
             'desc' => 'Init Kubernetes manifest in deploy directory',
@@ -83,12 +83,7 @@ class KubernetesCommand extends AbstractCommand
         ],
     ];
 
-    public function __construct(
-        private readonly KubernetesGenerator $generator,
-    ) {
-    }
-
-    public function init(InputInterface $input, OutputInterface $output): int
+    public function init(InputInterface $input, OutputInterface $output, KubernetesGenerator $generator): int
     {
         $envs = $input->getOption('envs');
         $environments = $envs ? \explode(',', $envs) : ['production', 'staging'];
@@ -97,7 +92,7 @@ class KubernetesCommand extends AbstractCommand
         $output->writeln('环境: ' . \implode(', ', $environments));
 
         try {
-            $success = $this->generator->initialize($environments);
+            $success = $generator->initialize($environments);
             if ($success) {
                 $output->writeln('<info>✅ Kubernetes 配置初始化完成</info>');
                 return 0;
@@ -111,7 +106,7 @@ class KubernetesCommand extends AbstractCommand
         }
     }
 
-    public function ingress(InputInterface $input, OutputInterface $output): int
+    public function ingress(InputInterface $input, OutputInterface $output, KubernetesGenerator $generator): int
     {
         if ($input->getOption('list')) {
             return $this->listIngress($input, $output);
@@ -122,7 +117,7 @@ class KubernetesCommand extends AbstractCommand
         $output->writeln('<info>正在生成 Ingress 配置...</info>');
 
         try {
-            $yaml = $this->generator->generateIngress($config);
+            $yaml = $generator->generateIngress($config);
             if (empty($yaml)) {
                 $output->writeln('<warning>⚠️  未生成任何 Ingress 配置（可能没有路由）</warning>');
                 return 0;
@@ -136,7 +131,7 @@ class KubernetesCommand extends AbstractCommand
         }
     }
 
-    public function daemon(InputInterface $input, OutputInterface $output): int
+    public function daemon(InputInterface $input, OutputInterface $output, KubernetesGenerator $generator): int
     {
         if ($input->getOption('list')) {
             return $this->listDaemon($input, $output);
@@ -147,7 +142,7 @@ class KubernetesCommand extends AbstractCommand
         $output->writeln('<info>正在生成 Daemon 配置...</info>');
 
         try {
-            $results = $this->generator->generateDaemon($config);
+            $results = $generator->generateDaemon($config);
             if (empty($results)) {
                 $output->writeln('<warning>⚠️  未生成任何 Daemon 配置（可能没有 daemon 命令）</warning>');
                 return 0;
@@ -164,7 +159,7 @@ class KubernetesCommand extends AbstractCommand
         }
     }
 
-    public function cronjob(InputInterface $input, OutputInterface $output): int
+    public function cronjob(InputInterface $input, OutputInterface $output, KubernetesGenerator $generator): int
     {
         if ($input->getOption('list')) {
             return $this->listCronJob($input, $output);
@@ -175,7 +170,7 @@ class KubernetesCommand extends AbstractCommand
         $output->writeln('<info>正在生成 CronJob 配置...</info>');
 
         try {
-            $results = $this->generator->generateCronJob($config);
+            $results = $generator->generateCronJob($config);
             if (empty($results)) {
                 $output->writeln('<warning>⚠️  未生成任何 CronJob 配置（可能没有 cronjob 命令）</warning>');
                 return 0;
@@ -192,7 +187,7 @@ class KubernetesCommand extends AbstractCommand
         }
     }
 
-    public function generate(InputInterface $input, OutputInterface $output): int
+    public function generate(InputInterface $input, OutputInterface $output, KubernetesGenerator $generator): int
     {
         $config = $this->createConfig($input);
 
@@ -203,7 +198,7 @@ class KubernetesCommand extends AbstractCommand
 
         // 生成 Ingress
         try {
-            $yaml = $this->generator->generateIngress($config);
+            $yaml = $generator->generateIngress($config);
             if (! empty($yaml)) {
                 $output->writeln('✅ Ingress 配置生成完成');
                 $totalSuccess++;
@@ -217,7 +212,7 @@ class KubernetesCommand extends AbstractCommand
 
         // 生成 Daemon
         try {
-            $results = $this->generator->generateDaemon($config);
+            $results = $generator->generateDaemon($config);
             if (! empty($results)) {
                 $output->writeln('✅ 生成了 ' . \count($results) . ' 个 Daemon 配置');
                 $totalSuccess += \count($results);
@@ -231,7 +226,7 @@ class KubernetesCommand extends AbstractCommand
 
         // 生成 CronJob
         try {
-            $results = $this->generator->generateCronJob($config);
+            $results = $generator->generateCronJob($config);
             if (! empty($results)) {
                 $output->writeln('✅ 生成了 ' . \count($results) . ' 个 CronJob 配置');
                 $totalSuccess += \count($results);
@@ -258,7 +253,7 @@ class KubernetesCommand extends AbstractCommand
     private function listIngress(InputInterface $input, OutputInterface $output): int
     {
         $config = $this->createConfig($input);
-        $resources = $this->generator->listResources($config);
+        $resources = $generator->listResources($config);
 
         $output->writeln('<info>📋 Ingress 资源预览</info>');
 
@@ -280,7 +275,7 @@ class KubernetesCommand extends AbstractCommand
     private function listDaemon(InputInterface $input, OutputInterface $output): int
     {
         $config = $this->createConfig($input);
-        $resources = $this->generator->listResources($config);
+        $resources = $generator->listResources($config);
 
         $output->writeln('<info>📋 Daemon 资源预览</info>');
 
@@ -302,7 +297,7 @@ class KubernetesCommand extends AbstractCommand
     private function listCronJob(InputInterface $input, OutputInterface $output): int
     {
         $config = $this->createConfig($input);
-        $resources = $this->generator->listResources($config);
+        $resources = $generator->listResources($config);
 
         $output->writeln('<info>📋 CronJob 资源预览</info>');
 
