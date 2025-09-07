@@ -1,0 +1,11 @@
+.*
+!.gitignore
+!.php-cs-fixer.dist.php
+!.github/
+!.claude/
+!.cursorrules
+!.spec-workflow/
+
+composer.lock
+vendor/
+coverage/

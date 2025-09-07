@@ -1,0 +1,15 @@
+{
+    "name": "hi/kubernetes",
+    "autoload": {
+        "psr-4": {
+            "Hi\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "anoxia",
+            "email": "anoxia@engineer.com"
+        }
+    ],
+    "require": {}
+}
