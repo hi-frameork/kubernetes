@@ -13,7 +13,8 @@ use Hi\Kubernetes\Data\GenerateConfig;
 class KubernetesCommand extends AbstractCommand
 {
     protected string $name = 'k8s';
-    protected string $desc = 'Kubernetes manifest generator command';
+    protected string $desc = 'Kubernetes manifest generator';
+    protected bool $hidden = true;
     protected array $actions = [
         'init' => [
             'desc' => 'Init Kubernetes manifest in deploy directory',
