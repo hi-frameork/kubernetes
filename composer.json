@@ -2,7 +2,7 @@
     "name": "hi/kubernetes",
     "autoload": {
         "psr-4": {
-            "Hi\\kubernetes\\": "src/kubernetes/"
+            "Hi\\Kubernetes\\": "src/kubernetes/"
         }
     },
     "authors": [
